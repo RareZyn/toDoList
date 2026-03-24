@@ -1,10 +1,11 @@
 from rest_framework import serializers
 from .models import Task, TaskDependency
 
+
 class DependencyInfoSerializer(serializers.ModelSerializer):
-  class Meta:
-    model = Task
-    fields = ['id','title','state']
+    class Meta:
+        model = Task
+        fields = ['id', 'title', 'state']
 
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -33,9 +34,11 @@ class TaskSerializer(serializers.ModelSerializer):
             return []
         blocking = obj.dependencies.exclude(state=Task.State.DONE)
         return DependencyInfoSerializer(blocking, many=True).data
-  
+
+
 class StateChangeSerializer(serializers.Serializer):
-  state = serializers.ChoiceField(choices=Task.State.choices)
+    state = serializers.ChoiceField(choices=Task.State.choices)
+
 
 class AddDependencySerializer(serializers.Serializer):
     dependency_id = serializers.IntegerField()
@@ -47,28 +50,13 @@ class AddDependencySerializer(serializers.Serializer):
             raise serializers.ValidationError(f"Task with id {value} does not exist.")
         return value
 
+
 class TaskCreateUpdateSerializer(serializers.ModelSerializer):
-   class Meta:
-    model = Task
-    field = ['title','description','due_date']
+    class Meta:
+        model = Task
+        fields = ['title', 'description', 'due_date']
 
-   def validate_title(self,value):
-      if not value.strip():
-         raise serializers.ValidationError("Title cannot be blank")
-      return value.strip()
-   
-class StateChangeSerializer(serializers.Serializer):
-   state = serializers.ChoiceField(choices= Task.State.choices)
-
-
-
-
- 
-   
-  
-
-  
-
-
-
-
+    def validate_title(self, value):
+        if not value.strip():
+            raise serializers.ValidationError("Title cannot be blank")
+        return value.strip()
