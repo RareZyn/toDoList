@@ -1,4 +1,4 @@
-from logging import config
+from decouple import config
 from pathlib import Path
 
 

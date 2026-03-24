@@ -15,7 +15,6 @@ You are building the entire stack: database, backend, and frontend.
 
 You may use **any language and framework** for both the backend and frontend. However, we prefer **Python (Django)** for the backend and **React** for the frontend, as these align with our stack.
 
-We expect you to write your own code. Do not use LLMs for code generation or completion -- we want to see **your** problem-solving and coding ability.
 
 ## Core Concepts
 

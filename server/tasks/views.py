@@ -11,7 +11,7 @@ from .serializers import (
     StateChangeSerializer,
     AddDependencySerializer,
 )
-from . import services
+from . import service as services
 
 # Create your views here.
 

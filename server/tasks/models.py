@@ -15,7 +15,7 @@ class Task(models.Model):
   updated_at = models.DateTimeField(auto_now=True)
 
   dependencies = models.ManyToManyField(
-    'self', through='Dependency', symmetrical=False, related_name='dependents')
+    'self', through='TaskDependency', symmetrical=False, related_name='dependents')
 
   class Meta:
     ordering = ['-created_at']
