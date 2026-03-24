@@ -1,121 +1,161 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
+import { useState, useEffect } from 'react'
 import './App.css'
+import { getTasks, createTask, updateTask, deleteTask, changeTaskState, addDependency, removeDependency, getTask } from './services/api.js'
+import Navbar from './components/Navbar.jsx'
+import FilterBar from './components/FilterBar.jsx'
+import TaskCard from './components/TaskCard.jsx'
+import TaskForm from './components/TaskForm.jsx'
+import TaskDetail from './components/TaskDetail.jsx'
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [tasks, setTasks] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [filter, setFilter] = useState('all')
+  const [selectedTask, setSelectedTask] = useState(null)
+  const [showCreateForm, setShowCreateForm] = useState(false)
+  const [editingTask, setEditingTask] = useState(null)
+
+  useEffect(() => {
+    loadTasks()
+  }, [filter])
+
+  async function loadTasks() {
+    setLoading(true)
+    try {
+      const data = await getTasks(filter)
+      setTasks(data)
+    } catch {
+      setTasks([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function refreshSelectedTask(taskId) {
+    try {
+      const fresh = await getTask(taskId)
+      setSelectedTask(fresh)
+    } catch {
+      setSelectedTask(null)
+    }
+  }
+
+  async function handleCreate(data) {
+    await createTask(data)
+    await loadTasks()
+  }
+
+  async function handleUpdate(id, data) {
+    await updateTask(id, data)
+    await loadTasks()
+    await refreshSelectedTask(id)
+  }
+
+  async function handleDelete(id) {
+    await deleteTask(id)
+    setSelectedTask(null)
+    await loadTasks()
+  }
+
+  async function handleStateChange(id, newState) {
+    await changeTaskState(id, newState)
+    await loadTasks()
+    await refreshSelectedTask(id)
+  }
+
+  async function handleAddDep(taskId, depId) {
+    await addDependency(taskId, depId)
+    await loadTasks()
+    await refreshSelectedTask(taskId)
+  }
+
+  async function handleRemoveDep(taskId, depId) {
+    await removeDependency(taskId, depId)
+    await loadTasks()
+    await refreshSelectedTask(taskId)
+  }
+
+  function handleCardClick(task) {
+    setSelectedTask(task)
+  }
+
+  function handleCloseDetail() {
+    setSelectedTask(null)
+  }
+
+  function handleOpenEdit() {
+    setEditingTask(selectedTask)
+    setSelectedTask(null)
+  }
+
+  function handleCloseForm() {
+    setShowCreateForm(false)
+    setEditingTask(null)
+  }
+
+  const isFormOpen = showCreateForm || editingTask !== null
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div id="app-root">
+      <Navbar />
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+      <main>
+        <div className="page-header">
+          <div className="page-header-left">
+            <FilterBar filter={filter} onFilterChange={setFilter} />
+          </div>
+          <button className="btn-create" onClick={() => setShowCreateForm(true)}>
+            + New Task
+          </button>
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+
+        {loading ? (
+          <div className="loading-state">Loading tasks...</div>
+        ) : tasks.length === 0 ? (
+          <div className="empty-state">
+            <p className="empty-state-title">No tasks here yet.</p>
+            <p className="empty-state-hint">
+              {filter === 'all'
+                ? 'Click "+ New Task" to create your first task.'
+                : `No tasks with state "${filter.replace('_', ' ')}".`}
+            </p>
+          </div>
+        ) : (
+          <div className="task-grid">
+            {tasks.map((task) => (
+              <TaskCard
+                key={task.id}
+                task={task}
+                onClick={handleCardClick}
+                onDelete={handleDelete}
+              />
+            ))}
+          </div>
+        )}
+      </main>
+
+      {isFormOpen && (
+        <TaskForm
+          task={editingTask}
+          onCreate={handleCreate}
+          onUpdate={handleUpdate}
+          onClose={handleCloseForm}
+        />
+      )}
+
+      {selectedTask && (
+        <TaskDetail
+          task={selectedTask}
+          allTasks={tasks}
+          onStateChange={handleStateChange}
+          onAddDep={handleAddDep}
+          onRemoveDep={handleRemoveDep}
+          onEdit={handleOpenEdit}
+          onDelete={handleDelete}
+          onClose={handleCloseDetail}
+        />
+      )}
+    </div>
   )
 }
-
-export default App
